@@ -1,3 +1,7 @@
+@import url("../public/assets/css/vendors/bootstrap.css");
+@import url("../public/assets/css/vendors/iconsax.css");
+@import url("../public/assets/css/style.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,11 +23,11 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+          to bottom,
+          transparent,
+          rgb(var(--background-end-rgb))
+  )
+  rgb(var(--background-start-rgb));
 }
 
 @layer utilities {
@@ -31,3 +35,123 @@ body {
     text-wrap: balance;
   }
 }
+
+/* body {
+  overflow: auto;
+} */
+
+.icon-custom {
+  font-size: 1.5rem;
+  color: #3bedb2;
+}
+
+.mobil_custom_menu {
+  font-size: 1.5rem;
+  color: #3bedb2;
+}
+
+.icon_size {
+  font-size: 1.5rem;
+}
+
+.chat-bubble__text {
+  color: #141d2b !important;
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-align: start;
+}
+
+/* //CONATINER */
+
+#chat_container {
+  flex: 1;
+  margin-inline-start: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 50px;
+  height: 75vh;
+  overflow-y: scroll;
+}
+
+@keyframes rotateY {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.loading-thinking {
+  animation: rotateY 3s infinite linear;
+}
+
+.chat-bubble{
+  background-color: #3bedb2;
+  border-radius: 10px;
+  padding: 7px;
+  margin-bottom: 10px;
+  max-width: 80%;
+  word-wrap: break-word;
+  display: flex;
+  align-items: center;
+}
+
+.chat-role-assistant {
+  align-self: flex-end;
+  margin-inline-end: 12px;
+  background-color:#fff;
+}
+
+.wrapper {
+  width: 100%;
+  padding: 15px;
+}
+
+.chat {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.profile {
+  width: 36px;
+  height: 36px;
+  border-radius: 5px;
+
+  background: #fd7e14;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ai .profile {
+  background: #10a37f;
+}
+
+.profile img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+
+.message {
+  flex: 1;
+  color: #3bedb2;
+  white-space: pre-wrap;
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.new_space {
+  padding: 0 1rem;
+}
+
