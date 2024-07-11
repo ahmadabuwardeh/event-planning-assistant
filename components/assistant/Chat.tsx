@@ -4,6 +4,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { BiMenu } from 'react-icons/bi';
 import { ChatBubble, Form } from '@/components/assistant';
 import { Message } from '@/types';
+import { socket } from "@/socket";
 
 const Chat: React.FC = () => {
     const [active, setActive] = useState<string>('Ask anything');
@@ -22,12 +23,17 @@ const Chat: React.FC = () => {
         if (prompt.trim()) {
             const newMessage = { role: 'user', content: prompt };
             setMessages((prevMessages) => [...prevMessages, newMessage]);
+            socket.emit("message1", prompt);
             callback();
         }
     };
 
     useEffect(() => {
         if (messages && messages.length && hide) setHide(false);
+
+        return () => {
+            socket.off("message1");
+        };
     }, [messages, hide]);
 
     if (loading) return <h2 className="bg-white">Loading...</h2>;
