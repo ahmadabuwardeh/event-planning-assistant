@@ -20,3 +20,14 @@ export interface ChatBubbleProps {
     role: string;
     content: string;
 }
+
+export interface ClientToServerEvents {
+    start_stream: (data: { message: string, threadId?: string }) => void;
+    get_thread_messages: (threadId:string) => any;
+}
+
+export interface ServerToClientEvents {
+    stream_data: (response: any) => void;
+    stream_end: () => void;
+    error: (error: string) => void;
+}

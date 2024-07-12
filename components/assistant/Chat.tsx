@@ -11,6 +11,7 @@ const Chat: React.FC = () => {
     const [hide, setHide] = useState<boolean>(true);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [userInputFlags, setUserInputFlags] = useState<boolean>(false);
 
     const close = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -23,18 +24,45 @@ const Chat: React.FC = () => {
         if (prompt.trim()) {
             const newMessage = { role: 'user', content: prompt };
             setMessages((prevMessages) => [...prevMessages, newMessage]);
-            socket.emit("message1", prompt);
+            if(hide) setHide(false);
+            // socket.emit("start_stream", { message: prompt, threadId:"thread_K4AQbY1kohZJ7qyVpHBDNkrU" });
+            socket.emit("start_stream", { message: prompt, threadId:undefined });
+            // socket.emit("get_thread_messages", "thread_K4AQbY1kohZJ7qyVpHBDNkrU");
             callback();
         }
     };
 
     useEffect(() => {
-        if (messages && messages.length && hide) setHide(false);
+        socket.on('textDelta', (data: any) => {
+            setMessages((prevMessages) => {
+                const lastMessage = prevMessages[prevMessages.length - 1];
+                return [...prevMessages.slice(0, prevMessages.length - 1), { ...lastMessage, content: lastMessage.content + data.value }];
+
+            });
+        });
+
+        socket.on('textCreated',()=>{
+            setMessages((prevState:Message[])=>{
+                return [...prevState, {role:'assistant', content:''}]
+            })
+        })
+
+        socket.on('stream_end', () => {
+            console.log('Stream ended');
+        });
+
+        socket.on('error', (error: string) => {
+            console.error('Socket error:', error);
+        });
 
         return () => {
-            socket.off("message1");
+            socket.off('stream_data');
+            socket.off('stream_end');
+            socket.off('error');
+            socket.off('textDelta');
+            socket.off('textCreated');
         };
-    }, [messages, hide]);
+    }, []);
 
     if (loading) return <h2 className="bg-white">Loading...</h2>;
 

@@ -5,7 +5,6 @@ const Page: React.FC = () => {
   return (
       <div>
         <Chatting />
-        <script type="module" src="script.js"></script>
       </div>
   );
 };

@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import next from 'next';
-import SocketService from "./services/SocketService.js";
+import {SocketService} from './services/SocketService.ts';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -14,7 +14,7 @@ app.prepare().then(() => {
     new SocketService(httpServer);
 
     httpServer
-        .once('error', (err) => {
+        .once('error', (err: any) => {
             console.error(err);
             process.exit(1);
         })
