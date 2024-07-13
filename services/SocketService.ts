@@ -1,10 +1,8 @@
 import { Server, Socket } from 'socket.io';
 import { ClientToServerEvents, ServerToClientEvents } from "@/types";
-import { createLangChainService } from "./langchain/LangChainFactoryService.ts";
 import { OpenAIService } from "./openai/OpenAiService.ts";
 import { RetrieveThreadMessagesHandler } from "./openai/handlers/RetrieveThreadHandler.ts";
 import { StreamThreadMessagesHandler } from "./openai/handlers/StreamThreadMessagesHandler.ts";
-import {CreateThreadHandler} from "@/services/openai/handlers/CreateThreadHandler.ts";
 
 
 export class SocketService {
@@ -13,33 +11,26 @@ export class SocketService {
     constructor(server: any) {
         this.io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
             cors: {
-                origin: "*", // adjust the origin as per your requirement
+                origin: "*",
                 methods: ["GET", "POST"]
             }
         });
-
-        // Uncomment this block if you need to use authentication
-        // this.io.use(async (socket, next) => {
-        //     const token = socket.handshake.auth.token;
-        //     const { data, error } = await supabase.auth.getUser(token);
-        //     if (error || !data.user) {
-        //         return next(new Error('Authentication error'));
-        //     }
-        //     socket.data.user = data.user;
-        //     next();
-        // });
 
         this.io.on("connection", (socket: Socket<ClientToServerEvents, ServerToClientEvents>) => {
             console.log("Received a new connection");
 
             socket.on("start_stream", async (data) => {
-                const { message, threadId } = data;
+                const { message, threadId, userId } = data;
 
                 try {
                     const openAIService = new OpenAIService(process.env.OPENAI_API_KEY || "");
                     const streamThreadMessagesHandler = new StreamThreadMessagesHandler(openAIService);
-                    await streamThreadMessagesHandler.handle({ threadId, assistantId:"asst_uImkPjScgX5MpITnAMi63nkK", message}, socket);
 
+                    const newThreadId = await streamThreadMessagesHandler.handle({ threadId, assistantId: "asst_uImkPjScgX5MpITnAMi63nkK", message, userId }, socket);
+
+                    if (newThreadId) {
+                        socket.emit("thread_created", { threadId: newThreadId });
+                    }
                     socket.emit("stream_end");
                 } catch (error) {
                     console.error('Error handling assistant message:', error);
@@ -47,7 +38,7 @@ export class SocketService {
                 }
             });
 
-            socket.on("get_thread_messages", async (threadId:string) => {
+            socket.on("get_thread_messages", async (threadId: string) => {
                 const openAIService = new OpenAIService(process.env.OPENAI_API_KEY || "");
                 const retrieveThreadMessagesHandler = new RetrieveThreadMessagesHandler(openAIService);
                 const response = await retrieveThreadMessagesHandler.handle({ threadId });

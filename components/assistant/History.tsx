@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { HistoryItem } from '@/types';
 
 interface HistoryProps {
@@ -8,6 +9,12 @@ interface HistoryProps {
 }
 
 const History: React.FC<HistoryProps> = ({ items }) => {
+    const router = useRouter();
+
+    const handleClick = (id: string) => {
+        router.push(`/?threadId=${id}`);
+    };
+
     return (
         <div className="tab-pane fade show active" id="history" role="tabpanel" aria-labelledby="history" tabIndex={0}>
             <div className="main-wrapper p-0">
@@ -27,10 +34,14 @@ const History: React.FC<HistoryProps> = ({ items }) => {
                         <div className="card-body px-sm-4 px-3">
                             <ul className="history-sec">
                                 {items.map((item, index) => (
-                                    <li key={index} className="history-main">
-                                        <div className="history-detail text-truncate flex items-center gap-2">
+                                    <li
+                                        key={index}
+                                        className="history-main cursor-pointer hover:bg-gray-100"
+                                        onClick={() => handleClick(item.id)}
+                                    >
+                                        <div className="history-detail text-truncate flex items-center gap-2 p-2">
                                             <div>
-                                                <p>{item.title}</p>
+                                                <p className="text-gray-800">{item.title}</p>
                                             </div>
                                         </div>
                                         <div className="history-time d-sm-flex d-none">

@@ -1,35 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createLangChainService } from "@/services/langchain/LangChainFactoryService";
-import {OpenAIService} from "@/services/openai/OpenAiService.ts";
+import { OpenAIService } from '@/services/openai/OpenAiService';
 
-const langChainService = createLangChainService();
-const openAIService = new OpenAIService(process.env.OPENAI_API_KEY || "");
+export async function GET(request: NextRequest) {
+    const { searchParams } = new URL(request.url);
+    const threadId = searchParams.get('threadId');
 
-export async function POST(req: NextRequest) {
+    if (!threadId) {
+        return NextResponse.json({ error: 'Thread ID is required' }, { status: 400 });
+    }
+
     try {
-        const { type, message, threadId } = await req.json();
+        const openAIService = new OpenAIService(process.env.OPENAI_API_KEY || "");
+        let messages = await openAIService.getThreadMessages(threadId);
+        messages = messages.reverse()
 
-        let response;
-        switch (type) {
-            case 'createThread':
-                response = await langChainService.createThread(message, null);
-                break;
-            case 'retrieveThreadMessages':
-                response = await openAIService.getThreadMessages(threadId);
-                break;
-            case 'addMessage':
-                response = await langChainService.addMessage(threadId, message, null);
-                break;
-            case 'pollThreadStatus':
-                response = await langChainService.pollThreadStatus(threadId, null);
-                break;
-            default:
-                return NextResponse.json({ error: 'Invalid request type' }, { status: 400 });
-        }
+        const formattedMessages = messages.map((msg: any) => {
+            let content = msg.content;
+            if (msg.text && typeof msg.text === 'object' && msg.text.value) {
+                content = msg.text.value;
+            } else if (typeof msg.content === 'object') {
+                content = JSON.stringify(msg.content);
+            }
+            return {
+                ...msg,
+                content,
+            };
+        });
 
-        return NextResponse.json(response, { status: 200 });
+        return NextResponse.json(formattedMessages, { status: 200 });
     } catch (error) {
-        console.error('Error handling request:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Error retrieving messages:', error);
+        return NextResponse.json({ error: 'Failed to retrieve messages' }, { status: 500 });
     }
 }

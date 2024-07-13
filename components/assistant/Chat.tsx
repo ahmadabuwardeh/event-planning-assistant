@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { BiMenu } from 'react-icons/bi';
 import { ChatBubble, Form } from '@/components/assistant';
 import { Message } from '@/types';
@@ -8,15 +9,44 @@ import { socket } from "@/socket";
 
 const Chat: React.FC = () => {
     const [active, setActive] = useState<string>('Ask anything');
-    const [hide, setHide] = useState<boolean>(true);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [userInputFlags, setUserInputFlags] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const threadId = searchParams.get('threadId');
 
-    const close = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        setHide(false);
-    };
+    useEffect(() => {
+        const fetchMessages = async (threadId: string) => {
+            try {
+                const response = await fetch(`/api/assistant/?threadId=${threadId}`);
+                const data = await response.json();
+
+                const parsedData = []
+                for (const item of data) {
+                    const messageObj = {
+                        role:item.role,
+                        content: JSON.parse(item.content)[0].text.value,
+                    }
+                    parsedData.push(messageObj);
+                }
+                if (response.ok) {
+                    setMessages(parsedData);
+                } else {
+                    console.error('Error fetching messages:', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (threadId) {
+            fetchMessages(threadId);
+        } else {
+            setLoading(false);
+        }
+    }, [threadId]);
 
     const handleSendMessage = (e: FormEvent<HTMLFormElement>, callback: () => void) => {
         e.preventDefault();
@@ -24,10 +54,7 @@ const Chat: React.FC = () => {
         if (prompt.trim()) {
             const newMessage = { role: 'user', content: prompt };
             setMessages((prevMessages) => [...prevMessages, newMessage]);
-            if(hide) setHide(false);
-            // socket.emit("start_stream", { message: prompt, threadId:"thread_K4AQbY1kohZJ7qyVpHBDNkrU" });
-            socket.emit("start_stream", { message: prompt, threadId:undefined });
-            // socket.emit("get_thread_messages", "thread_K4AQbY1kohZJ7qyVpHBDNkrU");
+            socket.emit("start_stream", { message: prompt, threadId: threadId || undefined, userId: 'user-id-from-session' });
             callback();
         }
     };
@@ -37,18 +64,21 @@ const Chat: React.FC = () => {
             setMessages((prevMessages) => {
                 const lastMessage = prevMessages[prevMessages.length - 1];
                 return [...prevMessages.slice(0, prevMessages.length - 1), { ...lastMessage, content: lastMessage.content + data.value }];
-
             });
         });
 
-        socket.on('textCreated',()=>{
-            setMessages((prevState:Message[])=>{
-                return [...prevState, {role:'assistant', content:''}]
-            })
-        })
+        socket.on('textCreated', () => {
+            setMessages((prevState: Message[]) => {
+                return [...prevState, { role: 'assistant', content: '' }];
+            });
+        });
 
         socket.on('stream_end', () => {
             console.log('Stream ended');
+        });
+
+        socket.on('thread_created', (data: { threadId: string }) => {
+            router.push(`/?threadId=${data.threadId}`);
         });
 
         socket.on('error', (error: string) => {
@@ -61,6 +91,7 @@ const Chat: React.FC = () => {
             socket.off('error');
             socket.off('textDelta');
             socket.off('textCreated');
+            socket.off('thread_created');
         };
     }, []);
 
@@ -95,7 +126,6 @@ const Chat: React.FC = () => {
                                 <input type="text" className="form-control" placeholder="Search here.." />
                             </div>
                             <ul className="inner-links-list" id="innerLink">
-                                {/* Add list items here */}
                             </ul>
                         </div>
                     </div>
@@ -120,23 +150,13 @@ const Chat: React.FC = () => {
                     </div>
                 </header>
                 <div className="main-chat">
-                    {hide ? (
-                        <div className="no-chat">
-                            <div>
-                                <img src="/assets/svg/no-chat.svg" className="img-fluid" alt="" />
-                                <h3>
-                                    {active === 'Ask anything' ? '' : 'Ask'} {active} chatbot
-                                </h3>
-                            </div>
-                        </div>
-                    ) : (
-                        <div id="chat_container" className="flex-1 ml-4 flex flex-col gap-2 pb-12 h-[75vh] overflow-y-scroll">
-                            {messages.map((itm, index) => (
-                                <ChatBubble key={index} role={itm.role} content={itm.content} />
-                            ))}
-                        </div>
-                    )}
-                    <Form handleSendMessage={handleSendMessage} setMessages={setMessages} close={close} />
+                    <div id="chat_container"
+                         className="flex-1 ml-4 flex flex-col gap-2 pb-12 h-[75vh] overflow-y-scroll">
+                        {messages.map((itm, index) => (
+                            <ChatBubble key={index} role={itm.role} content={itm.content}/>
+                        ))}
+                    </div>
+                    <Form handleSendMessage={handleSendMessage} setMessages={setMessages} close={close}/>
                 </div>
             </div>
         </div>

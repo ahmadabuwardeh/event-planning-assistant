@@ -1,8 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-    env:{
-        supabaseUrl:process.env.SUBABASE_URL,
-    }
-};
+const nextConfig = {};
 
 export default nextConfig;
