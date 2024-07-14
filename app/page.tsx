@@ -3,8 +3,8 @@ import { Chatting } from "@/components/assistant";
 
 export default async function Page() {
     return (
-        <div>
+        <main className="h-screen">
             <Chatting />
-        </div>
+        </main>
     );
 }

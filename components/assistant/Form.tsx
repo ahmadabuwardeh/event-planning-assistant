@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useState, FormEvent } from "react";
-import { BiMenu } from "react-icons/bi";
 import { MdSend } from "react-icons/md";
 import { FormProps } from "@/types";
 
 
-const Form: React.FC<FormProps> = ({ handleSendMessage, close }) => {
+const Form: React.FC<FormProps> = ({ handleSendMessage }) => {
     const [userTypings, setUserTypings] = useState<string>("");
 
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {

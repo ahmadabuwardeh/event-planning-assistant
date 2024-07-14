@@ -2,18 +2,45 @@
 
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BiMenu } from 'react-icons/bi';
 import { ChatBubble, Form } from '@/components/assistant';
-import { Message } from '@/types';
+import {HistoryItem, Message} from '@/types';
 import { socket } from "@/socket";
+import { supabase } from "@/lib/supabaseClient";
 
-const Chat: React.FC = () => {
+interface ChatProps {
+    setHistoryUpdateCount: (count: number) => void;
+    historyUpdateCount: number
+}
+
+
+const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }) => {
     const [active, setActive] = useState<string>('Ask anything');
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [userId, setUserId] = useState<string | null>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
     const threadId = searchParams.get('threadId');
+
+    const handleNewChat = () => {
+        setMessages([]);
+        setLoading(true);
+        setHistoryUpdateCount( historyUpdateCount + 1); // Correct type for setState
+        router.push('/');
+    };
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const { data, error } = await supabase.auth.getSession();
+            if (error) {
+                console.error('Error fetching session:', error);
+            } else {
+                setUserId(data.session?.user?.id || null);
+            }
+        };
+
+        fetchUserId();
+    }, []);
 
     useEffect(() => {
         const fetchMessages = async (threadId: string) => {
@@ -24,7 +51,7 @@ const Chat: React.FC = () => {
                 const parsedData = []
                 for (const item of data) {
                     const messageObj = {
-                        role:item.role,
+                        role: item.role,
                         content: JSON.parse(item.content)[0].text.value,
                     }
                     parsedData.push(messageObj);
@@ -51,10 +78,10 @@ const Chat: React.FC = () => {
     const handleSendMessage = (e: FormEvent<HTMLFormElement>, callback: () => void) => {
         e.preventDefault();
         const prompt = (e.target as HTMLFormElement).prompt.value;
-        if (prompt.trim()) {
+        if (prompt.trim() && userId) {
             const newMessage = { role: 'user', content: prompt };
             setMessages((prevMessages) => [...prevMessages, newMessage]);
-            socket.emit("start_stream", { message: prompt, threadId: threadId || undefined, userId: 'user-id-from-session' });
+            socket.emit("start_stream", { message: prompt, threadId: threadId || undefined, userId });
             callback();
         }
     };
@@ -98,67 +125,19 @@ const Chat: React.FC = () => {
     if (loading) return <h2 className="bg-white">Loading...</h2>;
 
     return (
-        <div className="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat" tabIndex={0}>
-            <div className="main-wrapper">
-                <nav className="navbar navbar-expand-lg bg-light p-0">
-                    <button
-                        className="navbar-toggler d-none"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarNav"
-                        aria-controls="navbarNav"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation"
-                    >
-                        <BiMenu className="text-xl text-green-500" />
-                    </button>
-                    <div className="collapse navbar-collapse" id="navbarNav">
-                        <div className="inner-menu-panel">
-                            <button
-                                data-bs-toggle="collapse"
-                                data-bs-target="#navbarNav"
-                                className="inner-close d-block d-lg-none"
-                            >
-                                Back
-                            </button>
-                            <div className="search-box">
-                                <i className="iconsax" data-icon="search-normal-2"></i>
-                                <input type="text" className="form-control" placeholder="Search here.." />
-                            </div>
-                            <ul className="inner-links-list" id="innerLink">
-                            </ul>
-                        </div>
-                    </div>
-                </nav>
-                <header className="chat-header">
-                    <div className="flex items-center gap-2">
-                        <button
-                            className="navbar-toggler d-md-none d-block"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#mainnavbarNav"
-                            aria-controls="mainnavbarNav"
-                            aria-expanded="false"
-                            aria-label="Toggle navigation"
-                        >
-                            <BiMenu className="text-xl text-green-500" />
-                        </button>
-                        <a href="index.html" className="logo-icon flex d-md-none">
-                            <img src="/assets/svg/logo-icon.svg" className="img-fluid" />
-                        </a>
-                        <h3 id="targetDiv">{active}</h3>
-                    </div>
-                </header>
-                <div className="main-chat">
-                    <div id="chat_container"
-                         className="flex-1 ml-4 flex flex-col gap-2 pb-12 h-[75vh] overflow-y-scroll">
-                        {messages.map((itm, index) => (
-                            <ChatBubble key={index} role={itm.role} content={itm.content}/>
-                        ))}
-                    </div>
-                    <Form handleSendMessage={handleSendMessage} setMessages={setMessages} close={close}/>
-                </div>
+        <div className="flex flex-col h-full">
+            <header className="flex items-center justify-between p-4 bg-gray-800 shadow">
+                <h3>{active}</h3>
+                <button onClick={handleNewChat} className="rounded outline hover:bg-gray-700 px-2 py-1">
+                    New Chat
+                </button>
+            </header>
+            <div className="flex-1 flex flex-col gap-2 pt-4 px-4 pb-20 overflow-y-auto">
+                {messages.map((itm, index) => (
+                    <ChatBubble key={index} role={itm.role} content={itm.content} />
+                ))}
             </div>
+            <Form handleSendMessage={handleSendMessage} setMessages={setMessages} />
         </div>
     );
 };

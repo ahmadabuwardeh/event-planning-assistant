@@ -6,53 +6,47 @@ import { HistoryItem } from '@/types';
 
 interface HistoryProps {
     items: HistoryItem[];
+    historyUpdateCount: number;
+
 }
 
-const History: React.FC<HistoryProps> = ({ items }) => {
+const History: React.FC<HistoryProps> = ({ items, historyUpdateCount }) => {
     const router = useRouter();
 
     const handleClick = (id: string) => {
         router.push(`/?threadId=${id}`);
     };
 
+    const handleVisualize = () => {
+        console.log('hello')
+    }
+
     return (
-        <div className="tab-pane fade show active" id="history" role="tabpanel" aria-labelledby="history" tabIndex={0}>
-            <div className="main-wrapper p-0">
-                <div className="fixed-header">
-                    <div className="flex items-center gap-2">
-                        <a href="index.html" className="logo-icon flex d-md-none">
-                            <img src="/assets/svg/logo-icon.svg" className="img-fluid" />
-                        </a>
-                        <h3>History</h3>
-                    </div>
-                </div>
-                <div className="main-section">
-                    <div className="container card p-0">
-                        <div className="card-header">
-                            <h3 className="text-white">Detailed History</h3>
-                        </div>
-                        <div className="card-body px-sm-4 px-3">
-                            <ul className="history-sec">
-                                {items.map((item, index) => (
-                                    <li
-                                        key={index}
-                                        className="history-main cursor-pointer hover:bg-gray-100"
-                                        onClick={() => handleClick(item.id)}
-                                    >
-                                        <div className="history-detail text-truncate flex items-center gap-2 p-2">
-                                            <div>
-                                                <p className="text-gray-800">{item.title}</p>
-                                            </div>
-                                        </div>
-                                        <div className="history-time d-sm-flex d-none">
-                                            <ul>
-                                                <li>{item.details}</li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+        <div className="flex flex-col h-full p-4 bg-gray-800">
+            <header className="flex items-center gap-2 mb-4 justify-between">
+                <h3>History</h3>
+                <button onClick={handleVisualize} className="rounded outline hover:bg-gray-700 px-2 py-1">
+                    Visualize
+                </button>
+            </header>
+            <div className="flex-1 overflow-y-auto">
+                <div className="bg-gray-900 shadow rounded-lg">
+                    <div className="p-4">
+                        <h3 className="text-gray-200 font-bold mb-4">Detailed History</h3>
+                        <ul className="space-y-2">
+                            {items.map((item, index) => (
+                                <li
+                                    key={index}
+                                    className="p-2 bg-gray-700 hover:bg-gray-800 rounded cursor-pointer"
+                                    onClick={() => handleClick(item.id)}
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <div className="text-gray-100">{item.title}</div>
+                                        <div className="text-sm text-gray-500">{item.details}</div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
             </div>

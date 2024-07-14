@@ -7,6 +7,7 @@ import { Thread, HistoryItem } from "@/types";
 
 const Chatting: React.FC = () => {
     const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+    const [historyUpdateCount, setHistoryUpdateCount] = useState<number>(0);
 
     useEffect(() => {
         const fetchThreads = async () => {
@@ -27,13 +28,15 @@ const Chatting: React.FC = () => {
         };
 
         fetchThreads();
-    }, []);
+    }, [historyUpdateCount]);
 
     return (
-        <section className="chatting-wrapper pt-0">
-            <div className="tab-content">
-                <Chat />
-                <History items={historyItems} />
+        <section className="flex flex-row h-screen">
+            <div className="flex flex-col w-1/4 bg-gray-900 overflow-y-auto">
+                <History items={historyItems} historyUpdateCount={historyUpdateCount}/>
+            </div>
+            <div className="flex flex-col w-3/4 p-4 bg-gray-900">
+                <Chat historyUpdateCount={historyUpdateCount} setHistoryUpdateCount={setHistoryUpdateCount}/>
             </div>
         </section>
     );

@@ -6,7 +6,6 @@ export interface Message {
 }
 
 export interface FormProps {
-    close: (e: MouseEvent<HTMLButtonElement>) => void;
     setMessages: Dispatch<SetStateAction<Message[]>>;
     handleSendMessage: (e: FormEvent<HTMLFormElement>, callback: () => void) => void;
 }

@@ -48,31 +48,47 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
-            {message && <p className="message">{message}</p>}
+        <div>
+            {message && <p className="text-emerald-500 mb-4">{message}</p>}
             {!otpSent ? (
-                <form onSubmit={handleSignIn} className="login-form">
-                    <label>Email</label>
-                    <input
-                        className="input-field bg-amber-400"
-                        type="email"
-                        value={email}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                        required
-                    />
-                    <button type="submit" className="submit-button">Send OTP</button>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                    <div>
+                        <label htmlFor="email" className="block text-gray-200 font-medium mb-2">Email</label>
+                        <input
+                            id="email"
+                            className="bg-gray-800 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            type="email"
+                            value={email}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        Send OTP
+                    </button>
                 </form>
             ) : (
-                <form onSubmit={handleVerifyOtp} className="otp-form">
-                    <label>OTP</label>
-                    <input
-                        className="input-field bg-amber-400"
-                        type="text"
-                        value={otp}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
-                        required
-                    />
-                    <button type="submit" className="submit-button">Verify OTP</button>
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                    <div>
+                        <label htmlFor="otp" className="block text-gray-200 font-medium mb-2">OTP</label>
+                        <input
+                            id="otp"
+                            className="bg-gray-800 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            type="text"
+                            value={otp}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-emerald-500 hover:bg-emerald-700 text-gray-50 font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        Verify OTP
+                    </button>
                 </form>
             )}
         </div>

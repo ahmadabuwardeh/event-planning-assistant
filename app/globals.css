@@ -56,8 +56,9 @@ body {
 
 .chat-bubble__text {
   color: #141d2b !important;
-  font-size: 1.2rem;
-  font-weight: 500;
+  padding: 0px 8px;
+  font-size: 1.1rem;
+  font-weight: 400;
   text-align: start;
 }
 
@@ -88,9 +89,9 @@ body {
 }
 
 .chat-bubble{
-  background-color: #3bedb2;
+  background-color: #34d399;
   border-radius: 10px;
-  padding: 7px;
+  padding: 16px;
   margin-bottom: 10px;
   max-width: 80%;
   word-wrap: break-word;

@@ -1,25 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { getCookie } from 'cookies-next';
+import { AuthSession } from '@supabase/supabase-js';
 
 const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
-    // const supabase = createRouteHandlerClient({ cookies });
-    // const { data: { session }, error } = await supabase.auth.getSession();
-
-    // if (error) {
-    //     return NextResponse.json({ error: 'Error fetching session' }, { status: 500 });
-    // }
-    //
-    // if (!session?.user) {
-    //     return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
-    // }
-
-    // const userId = session.user.id;
-    const userId = 'user-id-from-session'
     try {
+        const sessionCookie = getCookie('supabase', { req: request });
+
+        if (!sessionCookie) {
+            return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+        }
+
+        const session = JSON.parse(sessionCookie as string) as AuthSession;
+
+        if (!session?.user) {
+            return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+        }
+
+        const userId = session.user.id;
+
         const threads = await prisma.thread.findMany({
             where: {
                 userId: userId,
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
                 createdAt: 'desc',
             },
         });
+
         return NextResponse.json(threads, { status: 200 });
     } catch (error) {
         console.error('Error retrieving threads:', error);
