@@ -23,10 +23,10 @@ export class SocketService {
                 const { message, threadId, userId } = data;
 
                 try {
+                    const assistantId = process.env.ASSISTANT_ID
                     const openAIService = new OpenAIService(process.env.OPENAI_API_KEY || "");
                     const streamThreadMessagesHandler = new StreamThreadMessagesHandler(openAIService);
-
-                    const newThreadId = await streamThreadMessagesHandler.handle({ threadId, assistantId: "asst_uImkPjScgX5MpITnAMi63nkK", message, userId }, socket);
+                    const newThreadId = await streamThreadMessagesHandler.handle({ threadId, assistantId, message, userId }, socket);
 
                     if (newThreadId) {
                         socket.emit("thread_created", { threadId: newThreadId });

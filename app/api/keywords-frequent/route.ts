@@ -16,6 +16,10 @@ export async function GET(request: NextRequest) {
             take: 50,
         });
 
+        if (!keywords || keywords.length === 0) {
+            return NextResponse.json({ error: 'No keywords found' }, { status: 404 });
+        }
+
         const formattedKeywords = keywords.map(keyword => ({
             word: keyword.word,
             count: keyword.count,

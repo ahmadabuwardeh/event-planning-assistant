@@ -3,14 +3,9 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChatBubble, Form } from '@/components/assistant';
-import { Message } from '@/types';
+import { ChatProps, Message } from '@/types';
 import { socket } from "@/socket";
 import { supabase } from "@/lib/supabaseClient";
-
-interface ChatProps {
-    setHistoryUpdateCount: (count: number) => void;
-    historyUpdateCount: number
-}
 
 
 const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }) => {
@@ -47,6 +42,10 @@ const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }
             try {
                 const response = await fetch(`/api/assistant/?threadId=${threadId}`);
                 const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error fetching messages');
+                }
 
                 const parsedData = []
                 for (const item of data) {

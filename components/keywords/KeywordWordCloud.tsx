@@ -1,17 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4plugins_wordCloud from "@amcharts/amcharts4/plugins/wordCloud";
-import {Keyword} from "@/types";
-
+import { Keyword } from "@/types";
 
 const KeywordCloud: React.FC<{ keywords: Keyword[] }> = ({ keywords }) => {
     const chartRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const chart = am4core.create(chartRef.current!, am4plugins_wordCloud.WordCloud);
+        if (!chartRef.current) return;
+
+        const chart = am4core.create(chartRef.current, am4plugins_wordCloud.WordCloud);
         chart.fontFamily = "Courier New";
-        // chart.endAngle = 90;
-        // chart.startAngle = -90;
 
         chart.data = keywords.map(keyword => ({
             tag: keyword.word,

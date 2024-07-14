@@ -54,3 +54,8 @@ export interface Keyword {
     word: string;
     count: number;
 }
+
+export interface ChatProps {
+    setHistoryUpdateCount: (count: number) => void;
+    historyUpdateCount: number
+}

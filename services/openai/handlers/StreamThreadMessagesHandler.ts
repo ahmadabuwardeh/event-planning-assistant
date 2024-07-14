@@ -13,7 +13,7 @@ export class StreamThreadMessagesHandler implements IHandler {
         this.openAIService = openAIService;
     }
 
-    async handle({ threadId, assistantId, message, userId }: { threadId: string | undefined; assistantId: string; message: string; userId: string }, socket: any): Promise<string | null> {
+    async handle({ threadId, assistantId, message, userId }: { threadId: string | undefined; assistantId: string | undefined; message: string; userId: string }, socket: any): Promise<string | null> {
         try {
             if (!threadId) {
                 const newThreadId = await this.createThreadAddMessageAndSaveToDatabase(message, userId, socket);
@@ -68,7 +68,7 @@ export class StreamThreadMessagesHandler implements IHandler {
         }
     }
 
-    private streamThreadMessages(threadId: string, assistantId: string, socket: any): void {
+    private streamThreadMessages(threadId: string, assistantId: string | undefined, socket: any): void {
         try {
             this.openAIService.streamThreadMessages(threadId, assistantId, socket);
         } catch (error) {

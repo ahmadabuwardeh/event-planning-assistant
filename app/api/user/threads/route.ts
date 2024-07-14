@@ -30,6 +30,10 @@ export async function GET(request: NextRequest) {
             },
         });
 
+        if (!threads || threads.length === 0) {
+            return NextResponse.json({ error: 'No threads found for the user' }, { status: 404 });
+        }
+
         return NextResponse.json(threads, { status: 200 });
     } catch (error) {
         console.error('Error retrieving threads:', error);
