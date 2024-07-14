@@ -2,11 +2,14 @@ import OpenAI from "openai";
 import { AssistantStream } from "openai/lib/AssistantStream";
 import { IOpenAIService } from "./IOpenAiService.ts";
 
+
 export class OpenAIService implements IOpenAIService {
     private openai: OpenAI;
+    private readonly apiKey: string
 
     constructor(apiKey: string) {
         this.openai = new OpenAI({ apiKey });
+        this.apiKey=apiKey
     }
 
     async createThread(): Promise<string> {

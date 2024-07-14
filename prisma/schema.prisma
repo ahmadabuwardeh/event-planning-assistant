@@ -14,3 +14,9 @@ model Thread {
   createdAt DateTime @default(now())
   userId    String
 }
+
+model Keyword {
+  id        String @id @default(cuid())
+  word      String @unique
+  count     Int    @default(1)
+}

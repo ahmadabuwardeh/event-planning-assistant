@@ -50,3 +50,7 @@ export interface HistoryItem {
     details: string;
 }
 
+export interface Keyword {
+    word: string;
+    count: number;
+}

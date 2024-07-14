@@ -1,8 +1,10 @@
 import { IHandler } from "../../langchain/handlers/IHandler.ts";
 import { IOpenAIService } from "../IOpenAiService.ts";
 import { PrismaClient } from "@prisma/client";
+import { ExtractKeywordsHandler } from "../../langchain/handlers/ExtractKeywordsHandler.ts";
 
 const prisma = new PrismaClient();
+const extractKeywordsHandler = new ExtractKeywordsHandler();
 
 export class StreamThreadMessagesHandler implements IHandler {
     private openAIService: IOpenAIService;
@@ -11,18 +13,24 @@ export class StreamThreadMessagesHandler implements IHandler {
         this.openAIService = openAIService;
     }
 
-    async handle({ threadId, assistantId, message, userId }: { threadId: string | undefined | null; assistantId: string; message: string; userId: string }, socket: any): Promise<string | null> {
+    async handle({ threadId, assistantId, message, userId }: { threadId: string | undefined; assistantId: string; message: string; userId: string }, socket: any): Promise<string | null> {
         try {
             if (!threadId) {
-                threadId = await this.createThreadAddMessageAndSaveToDatabase(message, userId, socket);
-                if (!threadId) {
-                    throw new Error("Failed to create thread, add message, and save to database");
+                const newThreadId = await this.createThreadAddMessageAndSaveToDatabase(message, userId, socket);
+                if (!newThreadId) {
+                    throw new Error("Failed to create thread and save to database");
                 }
+                threadId = newThreadId;
             } else {
                 await this.addMessageToThread(threadId, message, socket);
             }
 
             this.streamThreadMessages(threadId, assistantId, socket);
+
+            extractKeywordsHandler.handle({ message }).catch(error => {
+                console.error('Error extracting keywords:', error);
+            });
+
             return threadId;
         } catch (error) {
             console.error('Error in StreamThreadMessagesHandler:', error);
@@ -31,7 +39,7 @@ export class StreamThreadMessagesHandler implements IHandler {
         }
     }
 
-    private async createThreadAddMessageAndSaveToDatabase(message: string, userId: string, socket: any): Promise<string | null> {
+    private async createThreadAddMessageAndSaveToDatabase(message: string, userId: string, socket: any): Promise<string | undefined> {
         try {
             const threadId = await this.openAIService.createThread();
             await this.addMessageToThread(threadId, message, socket);
@@ -44,9 +52,9 @@ export class StreamThreadMessagesHandler implements IHandler {
             });
             return threadId;
         } catch (error) {
-            console.error('Error creating thread, adding message, or saving to database:', error);
+            console.error('Error creating thread or saving to database:', error);
             socket.emit("error", "An error occurred while creating the thread.");
-            return null;
+            return undefined;
         }
     }
 

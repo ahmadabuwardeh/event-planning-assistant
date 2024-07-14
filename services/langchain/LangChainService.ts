@@ -1,10 +1,11 @@
-import {IHandler} from './handlers/IHandler.ts';
+import { IHandler } from './handlers/IHandler.ts';
 
 export class LangChainService {
     constructor(
         private createThreadHandler: IHandler,
         private addMessageHandler: IHandler,
-        private pollThreadStatusHandler: IHandler
+        private pollThreadStatusHandler: IHandler,
+        private extractKeywordsHandler: IHandler,
     ) {}
 
     async createThread(message: string, socket: any) {
@@ -17,5 +18,9 @@ export class LangChainService {
 
     async pollThreadStatus(threadId: string, socket: any) {
         return this.pollThreadStatusHandler.handle({ threadId }, socket);
+    }
+
+    async extractKeyWordsFromUserInput(messages: string[]): Promise<string[]> {
+        return this.extractKeywordsHandler.handle({ messages });
     }
 }

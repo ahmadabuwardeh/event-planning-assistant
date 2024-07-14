@@ -3,7 +3,7 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChatBubble, Form } from '@/components/assistant';
-import {HistoryItem, Message} from '@/types';
+import { Message } from '@/types';
 import { socket } from "@/socket";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -126,7 +126,7 @@ const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }
 
     return (
         <div className="flex flex-col h-full">
-            <header className="flex items-center justify-between p-4 bg-gray-800 shadow">
+            <header className="flex items-center justify-between p-4 bg-gray-800 shadow rounded">
                 <h3>{active}</h3>
                 <button onClick={handleNewChat} className="rounded outline hover:bg-gray-700 px-2 py-1">
                     New Chat

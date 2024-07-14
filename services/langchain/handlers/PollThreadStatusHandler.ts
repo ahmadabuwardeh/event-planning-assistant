@@ -1,4 +1,4 @@
-import {BaseHandler} from './BaseHandler.ts';
+import { BaseHandler } from './BaseHandler.ts';
 import { OpenAIAssistantRunnable } from 'langchain/experimental/openai_assistant';
 
 export class PollThreadStatusHandler extends BaseHandler {
@@ -13,7 +13,6 @@ export class PollThreadStatusHandler extends BaseHandler {
                 content: `Poll status for thread ID: ${threadId}`,
             });
 
-            // Simulate streaming by sending partial data
             socket.emit("stream_data", response);
         } catch (error) {
             console.error('Error polling thread status:', error);

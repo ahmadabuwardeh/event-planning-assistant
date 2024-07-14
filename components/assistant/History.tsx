@@ -18,7 +18,7 @@ const History: React.FC<HistoryProps> = ({ items, historyUpdateCount }) => {
     };
 
     const handleVisualize = () => {
-        console.log('hello')
+        router.push(`/keyword-cloud`);
     }
 
     return (

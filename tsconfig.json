@@ -10,10 +10,13 @@
     "noEmit": true,
     "downlevelIteration": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
+    "moduleResolution": "bundler",
     "isolatedModules": true,
     "jsx": "preserve",
+    "typeRoots": ["node_modules/@types"],
+    "types": ["node"],
     "incremental": true,
     "plugins": [
       {
