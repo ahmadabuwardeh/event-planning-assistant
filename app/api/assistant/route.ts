@@ -12,6 +12,11 @@ export async function GET(request: NextRequest) {
     try {
         const openAIService = new OpenAIService(process.env.OPENAI_API_KEY || "");
         let messages = await openAIService.getThreadMessages(threadId);
+
+        if (!messages || messages.length === 0) {
+            return NextResponse.json({ error: 'No messages found for the provided thread ID' }, { status: 404 });
+        }
+
         messages = messages.reverse()
 
         const formattedMessages = messages.map((msg: any) => {
