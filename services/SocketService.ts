@@ -3,6 +3,7 @@ import { ClientToServerEvents, ServerToClientEvents } from "@/types";
 import { OpenAIService } from "./openai/OpenAiService.ts";
 import { RetrieveThreadMessagesHandler } from "./openai/handlers/RetrieveThreadHandler.ts";
 import { StreamThreadMessagesHandler } from "./openai/handlers/StreamThreadMessagesHandler.ts";
+import { CreateLangChainService } from "./langchain/LangChainFactoryService.ts";
 
 
 export class SocketService {
@@ -25,7 +26,8 @@ export class SocketService {
                 try {
                     const assistantId = process.env.ASSISTANT_ID
                     const openAIService = new OpenAIService(process.env.OPENAI_API_KEY || "");
-                    const streamThreadMessagesHandler = new StreamThreadMessagesHandler(openAIService);
+                    const langChainService = CreateLangChainService();
+                    const streamThreadMessagesHandler = new StreamThreadMessagesHandler(openAIService, langChainService);
                     const newThreadId = await streamThreadMessagesHandler.handle({ threadId, assistantId, message, userId }, socket);
 
                     if (newThreadId) {

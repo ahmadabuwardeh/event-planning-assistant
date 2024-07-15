@@ -4,7 +4,7 @@ import { PollThreadStatusHandler } from './handlers/PollThreadStatusHandler.ts';
 import { ExtractKeywordsHandler } from './handlers/ExtractKeywordsHandler.ts';
 import { LangChainService } from './LangChainService.ts';
 
-export const createLangChainService = () => {
+export const CreateLangChainService = () => {
     const createThreadHandler = new CreateThreadHandler();
     const addMessageHandler = new AddMessageHandler();
     const pollThreadStatusHandler = new PollThreadStatusHandler();

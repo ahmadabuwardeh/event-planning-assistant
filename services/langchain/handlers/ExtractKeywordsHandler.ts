@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export class ExtractKeywordsHandler extends BaseHandler {
-    async handle({ message }: { message: string }): Promise<void> {
+    async handle( message : string | null | undefined): Promise<void> {
         const model = new LangChainOpenAi({
             model: "gpt-4o",
             temperature: 0.5,

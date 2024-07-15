@@ -1,16 +1,17 @@
 import { IHandler } from "../../langchain/handlers/IHandler.ts";
 import { IOpenAIService } from "../IOpenAiService.ts";
 import { PrismaClient } from "@prisma/client";
-import { ExtractKeywordsHandler } from "../../langchain/handlers/ExtractKeywordsHandler.ts";
+import { LangChainService } from "../../langchain/LangChainService.ts";
 
 const prisma = new PrismaClient();
-const extractKeywordsHandler = new ExtractKeywordsHandler();
 
 export class StreamThreadMessagesHandler implements IHandler {
     private openAIService: IOpenAIService;
+    private langChainService: LangChainService;
 
-    constructor(openAIService: IOpenAIService) {
+    constructor(openAIService: IOpenAIService, langChainService: LangChainService) {
         this.openAIService = openAIService;
+        this.langChainService = langChainService;
     }
 
     async handle({ threadId, assistantId, message, userId }: { threadId: string | undefined; assistantId: string | undefined; message: string; userId: string }, socket: any): Promise<string | null> {
@@ -27,7 +28,7 @@ export class StreamThreadMessagesHandler implements IHandler {
 
             this.streamThreadMessages(threadId, assistantId, socket);
 
-            extractKeywordsHandler.handle({ message }).catch(error => {
+            this.langChainService.extractKeyWordsFromUserInput(message).catch(error => {
                 console.error('Error extracting keywords:', error);
             });
 
@@ -39,17 +40,25 @@ export class StreamThreadMessagesHandler implements IHandler {
         }
     }
 
-    private async createThreadAddMessageAndSaveToDatabase(message: string, userId: string, socket: any): Promise<string | undefined> {
+    private async createThreadAddMessageAndSaveToDatabase(message: string | null | undefined, userId: string, socket: any): Promise<string | undefined> {
         try {
+            if (!message) {
+                throw new Error('Message content is null or undefined');
+            }
+
             const threadId = await this.openAIService.createThread();
             await this.addMessageToThread(threadId, message, socket);
+
+            const truncatedMessage = message?.length > 10 ? message.substring(0, 10) : message;
+
             await prisma.thread.create({
                 data: {
                     id: threadId,
-                    content: message,
+                    content: truncatedMessage,
                     userId: userId,
                 },
             });
+
             return threadId;
         } catch (error) {
             console.error('Error creating thread or saving to database:', error);
@@ -57,6 +66,7 @@ export class StreamThreadMessagesHandler implements IHandler {
             return undefined;
         }
     }
+
 
     private async addMessageToThread(threadId: string, message: string, socket: any): Promise<void> {
         try {

@@ -20,7 +20,7 @@ export class LangChainService {
         return this.pollThreadStatusHandler.handle({ threadId }, socket);
     }
 
-    async extractKeyWordsFromUserInput(messages: string[]): Promise<string[]> {
+    async extractKeyWordsFromUserInput(messages: string | null | undefined): Promise<string[]> {
         return this.extractKeywordsHandler.handle({ messages });
     }
 }
