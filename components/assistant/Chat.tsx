@@ -7,7 +7,6 @@ import { ChatProps, Message } from '@/types';
 import { socket } from "@/socket";
 import { supabase } from "@/lib/supabaseClient";
 
-
 const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }) => {
     const [active, setActive] = useState<string>('Ask anything');
     const [messages, setMessages] = useState<Message[]>([]);
@@ -20,7 +19,7 @@ const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }
     const handleNewChat = () => {
         setMessages([]);
         setLoading(true);
-        setHistoryUpdateCount( historyUpdateCount + 1); // Correct type for setState
+        setHistoryUpdateCount(historyUpdateCount + 1); // Correct type for setState
         router.push('/');
     };
 
@@ -47,12 +46,12 @@ const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }
                     throw new Error(data.error || 'Error fetching messages');
                 }
 
-                const parsedData = []
+                const parsedData = [];
                 for (const item of data) {
                     const messageObj = {
                         role: item.role,
                         content: JSON.parse(item.content)[0].text.value,
-                    }
+                    };
                     parsedData.push(messageObj);
                 }
                 if (response.ok) {
@@ -72,7 +71,7 @@ const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }
         } else {
             setLoading(false);
         }
-    }, [threadId]);
+    }, [threadId, router]);
 
     const handleSendMessage = (e: FormEvent<HTMLFormElement>, callback: () => void) => {
         e.preventDefault();
@@ -112,14 +111,13 @@ const Chat: React.FC<ChatProps> = ({ setHistoryUpdateCount, historyUpdateCount }
         });
 
         return () => {
-            socket.off('stream_data');
-            socket.off('stream_end');
-            socket.off('error');
             socket.off('textDelta');
             socket.off('textCreated');
+            socket.off('stream_end');
             socket.off('thread_created');
+            socket.off('error');
         };
-    }, []);
+    }, [router]);
 
     if (loading) return <h2 className="bg-white">Loading...</h2>;
 

@@ -18,8 +18,8 @@ const History: React.FC<HistoryProps> = ({ items, historyUpdateCount }) => {
     };
 
     const handleVisualize = () => {
-        router.push(`/keyword-cloud`);
-    }
+        window.open('/keyword-cloud', '_blank');
+    };
 
     return (
         <div className="flex flex-col h-full p-4 bg-gray-800">

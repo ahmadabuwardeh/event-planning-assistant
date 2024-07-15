@@ -1,10 +1,12 @@
-import React from "react";
-import { Chatting } from "@/components/assistant";
+import React from 'react';
+import ChattingServer from '@/components/assistant/ChattingServer';
 
-export default async function Page() {
+const Page = () => {
     return (
-        <main className="h-screen">
-            <Chatting />
-        </main>
+        <div>
+            <ChattingServer />
+        </div>
     );
-}
+};
+
+export default Page;
