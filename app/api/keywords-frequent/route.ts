@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { Keyword } from "@/types";
 
 const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
     try {
-        const keywords = await prisma.keyword.findMany({
+        const keywords: Keyword[] = await prisma.keyword.findMany({
             select: {
                 word: true,
                 count: true,
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'No keywords found' }, { status: 404 });
         }
 
-        const formattedKeywords = keywords.map(keyword => ({
+        const formattedKeywords = keywords.map((keyword: Keyword) => ({
             word: keyword.word,
             count: keyword.count,
         }));
