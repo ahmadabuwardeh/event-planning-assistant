@@ -14,7 +14,6 @@ export class CreateThreadHandler extends BaseHandler {
                 threadId:'thread_K4AQbY1kohZJ7qyVpHBDNkrU'
             });
 
-            // Simulate streaming by sending partial data
             socket.emit("stream_data", response);
         } catch (error) {
             console.error('Error creating thread:', error);
